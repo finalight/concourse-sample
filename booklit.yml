@@ -6,16 +6,20 @@ resources:
     uri: https://github.com/finalight/rnsample.git
     branch: master
 
-
 # - name: node-image
 #   type: registry-image
 #   source:
 #     repository: node
 
-- name: android-emulator-image
+- name: fastlane-image
   type: registry-image
   source:
-    repository: finalight/detox-android-emulator
+    repository: finalight/fastlane
+
+# - name: android-emulator-image
+#   type: registry-image
+#   source:
+#     repository: finalight/detox-android-emulator
 
 jobs:
 # - name: unit-test
@@ -49,28 +53,54 @@ jobs:
 #         path: npm
 #         args: ["run", "test"]
 #         dir: repo
-- name: e2e-test
+- name: deploy-android
   public: true
   plan:
-  - get: android-emulator-image
+  - get: fastlane-image
   - get: repo
     trigger: true
     # passed: [unit-test]
-  - task: install
-    image: android-emulator-image
+  - task: deploy
+    image: fastlane-image
     config:
       inputs:
       - name: repo
-      outputs:
-      - name: dependencies
-        path: repo/node_modules
       platform: linux
       run:
         user: root
         path: sh
-        args:
+        args: 
         - -xc
         - |
-          npx detox build -c android
-          npx detox test -c android --headless
-        dir: repo
+          cd ..
+          npm i
+          cd android
+          echo ((rnsamplekeystore.key)) > something.b64 
+          base64 -d something.b64 > ./app/my-upload-key.keystore
+          fastlane android deploy_internal
+        dir: repo/android
+# - name: e2e-test
+#   public: true
+#   plan:
+#   - get: android-emulator-image
+#   - get: repo
+#     trigger: true
+#     # passed: [unit-test]
+#   - task: install
+#     image: android-emulator-image
+#     config:
+#       inputs:
+#       - name: repo
+#       outputs:
+#       - name: dependencies
+#         path: /home/node_modules
+#       platform: linux
+#       run:
+#         user: root
+#         path: sh
+#         args:
+#         - -xc
+#         - |
+#           npx detox build -c android
+#           npx detox test -c android --headless
+#         dir: repo

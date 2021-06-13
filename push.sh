@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker push finalight/detox-android-emulator          
+docker push finalight/fastlane          

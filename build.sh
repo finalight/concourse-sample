@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t finalight/detox-android-emulator -f AndroidDockerfile .
+docker build -t finalight/fastlane -f AndroidDockerfile .
