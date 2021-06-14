@@ -63,6 +63,8 @@ jobs:
   - task: deploy
     image: fastlane-image
     config:
+      caches:
+      - path: node-modules/
       inputs:
       - name: repo
       platform: linux
@@ -72,11 +74,13 @@ jobs:
         args: 
         - -xc
         - |
-          cd ..
+          echo ((rnsamplekeystore.googleserviceaccount)) > googleserviceaccount.b64 
+          base64 -d googleserviceaccount.b64 > google-service-account.json
+          echo ((rnsamplekeystore.key)) > keystore.b64 
+          base64 -d keystore.b64 > ./app/my-upload-key.keystore
+          cd ../
           npm i
           cd android
-          echo ((rnsamplekeystore.key)) > something.b64 
-          base64 -d something.b64 > ./app/my-upload-key.keystore
           fastlane android deploy_internal
         dir: repo/android
 # - name: e2e-test
