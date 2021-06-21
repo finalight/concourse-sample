@@ -32,8 +32,6 @@ sdkmanager "platform-tools" && \
 sdkmanager "extras;android;m2repository" && \
 sdkmanager "extras;google;m2repository"
 
-
-
 # Clean up
 RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
 apt-get autoremove -y && \

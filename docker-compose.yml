@@ -28,9 +28,9 @@ services:
       CONCOURSE_TSA_CLIENT_SECRET: Y29uY291cnNlLXdvcmtlcgo=
       CONCOURSE_GARDEN_DNS_SERVER: 8.8.8.8
       CONCOURSE_VAULT_URL: http://vault:8200
-      CONCOURSE_VAULT_CLIENT_TOKEN: Hastk4kamUwjY1L5tFJED36l
+      CONCOURSE_VAULT_CLIENT_TOKEN: GloOI7fTsHQAyaFkN9so1EIi
   vault:
     image: vault
     ports: ["8200:8200"]
     environment:
-    - VAULT_DEV_ROOT_TOKEN_ID=G4P6aUPoqFfQz5JsQjkV5xer
+    - VAULT_DEV_ROOT_TOKEN_ID=GloOI7fTsHQAyaFkN9so1EIi

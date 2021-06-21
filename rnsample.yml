@@ -11,15 +11,15 @@ resources:
 #   source:
 #     repository: node
 
-- name: fastlane-image
-  type: registry-image
-  source:
-    repository: finalight/fastlane
-
-# - name: android-emulator-image
+# - name: fastlane-image
 #   type: registry-image
 #   source:
-#     repository: finalight/detox-android-emulator
+#     repository: finalight/fastlane
+
+- name: android-emulator-image
+  type: registry-image
+  source:
+    repository: finalight/detox-android-emulator
 
 jobs:
 # - name: unit-test
@@ -53,58 +53,60 @@ jobs:
 #         path: npm
 #         args: ["run", "test"]
 #         dir: repo
-- name: deploy-android
+- name: e2e-test
   public: true
   plan:
-  - get: fastlane-image
+  - get: android-emulator-image
   - get: repo
     trigger: true
     # passed: [unit-test]
-  - task: deploy
-    image: fastlane-image
+  - task: install
+    image: android-emulator-image
     config:
-      caches:
-      - path: node-modules/
       inputs:
       - name: repo
+      # outputs:
+      # - name: dependencies
+      #   path: /home/node_modules
       platform: linux
       run:
         user: root
         path: sh
-        args: 
+        args:
         - -xc
         - |
-          echo ((rnsamplekeystore.googleserviceaccount)) > googleserviceaccount.b64 
-          base64 -d googleserviceaccount.b64 > google-service-account.json
-          echo ((rnsamplekeystore.key)) > keystore.b64 
-          base64 -d keystore.b64 > ./app/my-upload-key.keystore
-          cd ../
           npm i
-          cd android
-          fastlane android deploy_internal
-        dir: repo/android
-# - name: e2e-test
+          echo ((rnsamplekeystore.key)) > keystore.b64 
+          base64 -d keystore.b64 > ./android/app/my-upload-key.keystore
+          npm run e2e:android
+        dir: repo
+# - name: deploy-android
 #   public: true
 #   plan:
-#   - get: android-emulator-image
+#   - get: fastlane-image
 #   - get: repo
 #     trigger: true
 #     # passed: [unit-test]
-#   - task: install
-#     image: android-emulator-image
+#   - task: deploy
+#     image: fastlane-image
 #     config:
+#       caches:
+#       - path: node-modules/
 #       inputs:
 #       - name: repo
-#       outputs:
-#       - name: dependencies
-#         path: /home/node_modules
 #       platform: linux
 #       run:
 #         user: root
 #         path: sh
-#         args:
+#         args: 
 #         - -xc
 #         - |
-#           npx detox build -c android
-#           npx detox test -c android --headless
-#         dir: repo
+#           echo ((rnsamplekeystore.googleserviceaccount)) > googleserviceaccount.b64 
+#           base64 -d googleserviceaccount.b64 > google-service-account.json
+#           echo ((rnsamplekeystore.key)) > keystore.b64 
+#           base64 -d keystore.b64 > ./app/my-upload-key.keystore
+#           cd ../
+#           npm i
+#           cd android
+#           fastlane android deploy_internal
+#         dir: repo/android
