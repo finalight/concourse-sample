@@ -1,38 +1,27 @@
-FROM adoptopenjdk/openjdk8
+FROM finalight/gradle
 LABEL maintainer="finalight <finalight@gmail.com>"
 
-ENV ANDROID_SDK_URL https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip
-ENV ANDROID_HOME /usr/local/android-sdk-linux
-ENV PATH $PATH=$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/build-tools:$PATH
-
-WORKDIR /home
-
+#install node
 RUN apt-get update && \
 apt-get install unzip
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
+RUN apt install -y libnss3-dev libgdk-pixbuf2.0-dev libgtk-3-dev libxss-dev
 
-# Install ruby
-RUN apt-get install --no-install-recommends -y --allow-unauthenticated build-essential git ruby-full
+# android sdk|build-tools|image
+ENV ANDROID_IMAGES="system-images;android-26;google_apis;x86_64"   
+RUN echo yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+RUN echo yes | $ANDROID_HOME/tools/bin/sdkmanager ${ANDROID_IMAGES}
 
-# install fastlane
-RUN gem install bundler && gem install fastlane
+#android-wait-for-emulator
+ENV PATH ${SDK_HOME}/bin:$PATH
+RUN curl https://raw.githubusercontent.com/Cangol/android-gradle-docker/master/android-wait-for-emulator -o ${SDK_HOME}/bin/android-wait-for-emulator
+RUN chmod u+x ${SDK_HOME}/bin/android-wait-for-emulator
 
-RUN mkdir "$ANDROID_HOME" .android && \
-    cd "$ANDROID_HOME" && \
-    curl -o sdk.zip $ANDROID_SDK_URL && \
-    unzip sdk.zip && \
-    rm sdk.zip && \
-# Download Android SDK
-yes | sdkmanager --licenses && \
-sdkmanager --update && \
-sdkmanager "build-tools;29.0.3" && \
-sdkmanager "platforms;android-29" && \
-sdkmanager "platform-tools" && \
-sdkmanager "extras;android;m2repository" && \
-sdkmanager "extras;google;m2repository"
-
-# Clean up
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-apt-get autoremove -y && \
-apt-get clean
+#avdmanager create avd
+RUN ${ANDROID_HOME}/tools/bin/avdmanager create avd --force --name Nexus_4_API_26 -k  ${ANDROID_IMAGES} --device "Nexus 4" --sdcard 500M
+RUN ${ANDROID_HOME}/platform-tools/adb kill-server
+RUN ${ANDROID_HOME}/platform-tools/adb start-server
+RUN ${ANDROID_HOME}/tools/emulator -avd test -noaudio -no-window &
+RUN android-wait-for-emulator
+RUN adb shell input keyevent 82 &

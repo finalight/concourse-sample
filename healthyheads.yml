@@ -3,8 +3,9 @@ resources:
   type: git
   icon: github
   source:
-    uri: https://github.com/finalight/rnsample.git
+    uri: git@github.com:pivotal-sg/healthy-heads.git
     branch: master
+    private_key: ((secrets.privatekey))
 
 # - name: node-image
 #   type: registry-image
@@ -76,7 +77,7 @@ jobs:
         - -xc
         - |
           npm i
-          echo ((rnsamplekeystore.key)) > keystore.b64 
+          echo ((secrets.key)) > keystore.b64 
           base64 -d keystore.b64 > ./android/app/my-upload-key.keystore
           npm run e2e:android
         dir: repo
